@@ -10,11 +10,11 @@ typedef struct {
     bool loaded;
 }Cell;
 
-Cell* Cell_Create(int x, int y);
+Cell* Cell_Create(int x, int y, int size);
 void Cell_Prop_Add(Cell *cell, Entity* mdl);
-void Cell_Render(Cell *cell);
+void Cell_Render(Cell *cell, int dist);
 void Cell_Destroy(Cell *cell);
 void Cell_Load(Cell *cell);
 void Cell_Unload(Cell *cell);
 bool Cell_IsLoaded(Cell *cell);
-void Cell_DrawTerrain(Cell *cell);
+void Cell_DrawTerrain(Cell *cell, int lod);

@@ -75,8 +75,7 @@ void Scene_Tick(SceneData* Scene)
     float cx = (float)Scene->PlayerCar->Entity->Model->x/4160;
     float cy = 0; //Scene->PlayerCar->Entity->Model->y;
     float cz = (float)Scene->PlayerCar->Entity->Model->z/4160;
-    float direction = ((float)Scene->PlayerCar->Entity->Model->ry/1000)*360 * 2;
-    float angle = (M_PI * direction /180);
+    float angle = Entity_GetAngle_Radians(Scene->PlayerCar->Entity);
   //  printf("Direction %f Angle %f ", direction, angle);
     float frontX = sin(angle);
     float frontY = cos(angle); 
@@ -116,6 +115,7 @@ void Scene_Init(SceneData* Scene)
 
     Car *testCar = Entity_Car_Create();
     Entity_SetPos(testCar->Entity, 10,0,-5);
+    testCar->aiType = AI_TRAFFIC;
     World_AddCar(Scene->GameWorld, testCar);
 
    

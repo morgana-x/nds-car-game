@@ -14,6 +14,37 @@ float util_dist_float(float x1, float y1, float z1, float x2, float y2, float z2
     float dz = (z1-z2);
     return sqrt( (dx*dx) + (dy*dy) + (dz*dz));
 }
+
+void draw_quad(int x, int y, int z, int scale)
+{
+    MATRIX_PUSH = 0;
+    MATRIX_TRANSLATE = x;
+    MATRIX_TRANSLATE = y;
+    MATRIX_TRANSLATE = z;
+    MATRIX_SCALE = scale;
+    MATRIX_SCALE = 1;
+    MATRIX_SCALE = scale;
+    NE_PolyBegin(GL_QUAD);
+
+      //  NE_PolyColor(NE_Red);    // Set next vertices color
+        NE_PolyTexCoord(0, 0);   // Texture coordinates
+        NE_PolyVertex(0, 0, 0); // Send new vertex
+
+       // NE_PolyColor(NE_Blue);
+        NE_PolyTexCoord(0, 128);
+        NE_PolyVertex(0, 0, 1);
+
+       // NE_PolyColor(NE_Green);
+        NE_PolyTexCoord(128, 128);
+        NE_PolyVertex(1, 0, 1);
+
+      //  NE_PolyColor(NE_Yellow);
+        NE_PolyTexCoord(128, 0);
+        NE_PolyVertex(1, 0, 0);
+
+    NE_PolyEnd();
+    MATRIX_POP = 1;
+}
 /*
 int util_dist(NE_Camera *cam, NE_Model *model)
 {

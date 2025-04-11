@@ -11,8 +11,11 @@ typedef struct {
 
 Entity *Entity_Create();
 void Entity_LoadModel(  Entity *entity, const char* path);
-void Entity_LoadTexture(  Entity *entity, const char* path, int width, int height );
+void Entity_LoadTexture(  Entity *entity, const char* path, int width, int height);
+void Entity_LoadTexture_Transperant(  Entity *entity, const char* path, int width, int height);
 void Entity_Init(  Entity *entity);
 void Entity_Tick(  Entity *entity);
 void Entity_SetPos(Entity *entity, int x, int y, int z);
 void Entity_Destroy(Entity *entity);
+float Entity_GetAngle_Degrees(Entity *entity);
+float Entity_GetAngle_Radians(Entity *entity);

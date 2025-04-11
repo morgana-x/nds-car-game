@@ -2,7 +2,7 @@
 #include "resource.h"
 #include "util.h"
 #include "math.h"
-void World_Render_Cell(World *world,Entity *PlayerCar, int x, int y)
+void World_Render_Cell(World *world,Entity *PlayerCar, int x, int y, int dist)
 {
     if (!World_Cell_Inbounds(world, x, y))
         return;
@@ -18,23 +18,23 @@ void World_Render_Cell(World *world,Entity *PlayerCar, int x, int y)
     /*float dist = util_dist_float((float)PlayerCar->Model->x, 0, (float)PlayerCar->Model->z, (float)world->cells[index]->x, 0, (float)world->cells[index]->y);
     printf("Dist %f\n", dist);
     if (dist > 100000) return;*/
-    Cell_Render(world->cells[index]);
+    Cell_Render(world->cells[index], dist);
 }
 void World_Render(World *world,Entity *PlayerCar)
 {
-    float direction = ((float)PlayerCar->Model->ry/1000)*360 * 2;
+    /*float direction = ((float)PlayerCar->Model->ry/1000)*360 * 2;
     float angle = (M_PI * direction /180);
     float frontX = sin(angle);
-    float frontY = cos(angle);
+    float frontY = cos(angle);*/
 
     int cell_size = world->cell_size;
-    int cx = (int)((int)PlayerCar->Model->x + frontX*200000)/cell_size;
-    int cz = (int)((int)PlayerCar->Model->z + frontY*200000)/cell_size;
-    for (int x=-2;x<=2;x++)
+    int cx = (int)((int)PlayerCar->Model->x /*+ frontX*200000*/)/cell_size;
+    int cz = (int)((int)PlayerCar->Model->z /*+ frontY*200000*/)/cell_size;
+    for (int x=-3;x<=3;x++)
     {
-        for (int y=-2;y<=2;y++)
+        for (int y=-3;y<=3;y++)
         {
-            World_Render_Cell(world,PlayerCar, cx + x, cz+y);
+            World_Render_Cell(world,PlayerCar, cx + x, cz+y, sqrt((x*x)+(y*y)));
         }
     }
     /*for (int x=-4;x<=4;x++)
@@ -110,7 +110,7 @@ World *World_Init()
     world->cells_width = 10;
     world->cells_height = 10;
     world->cells_max = world->cells_width*world->cells_height;
-    world->cell_size = 140000;
+    world->cell_size = 250000;
     //NE_Material *grassMat = Resource_LoadMaterial("grass.img.bin", 128, 128);
 
     int cell_size = world->cell_size;//100000;
@@ -120,7 +120,7 @@ World *World_Init()
     {
         for (int cy=0; cy<world->cells_height; cy++)
         {
-            Cell *cell = Cell_Create(cx*cell_size,cy*cell_size);//, grassMat);
+            Cell *cell = Cell_Create(cx,cy, world->cell_size);//, grassMat);
             //Cell_Load(cell);
             World_Cell_Add(world, cell, cx, cy);
         }

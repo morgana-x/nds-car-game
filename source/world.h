@@ -16,7 +16,7 @@ typedef struct {
 
 World *World_Init();
 void World_Render(World *world,Entity *Camera);
-void World_Render_Cell(World *world,Entity *PlayerCar, int x, int y);
+void World_Render_Cell(World *world,Entity *PlayerCar, int x, int y, int dist);
 void World_Tick(World *world);
 bool World_AddCar(World *world,Car* car);
 void World_Cell_Add(World *world, Cell *cell, int x, int y);

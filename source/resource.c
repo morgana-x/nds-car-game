@@ -1,7 +1,15 @@
 #include "resource.h"
 #include "string.h"
-
-NE_Material* Resource_LoadMaterial( const char* path, int width, int height ) {
+NE_Material* Resource_LoadMaterial( const char* path, int width, int height )
+{
+    return  Resource_LoadMaterial_Advanced( path,  width, height, NE_RGB5);
+} 
+NE_Material* Resource_LoadMaterialTransperant( const char* path, int width, int height )
+{
+    //printf("LOading transerant %s", path);
+    return  Resource_LoadMaterial_Advanced( path,  width, height, NE_A1RGB5);
+} 
+NE_Material* Resource_LoadMaterial_Advanced( const char* path, int width, int height, NE_TextureFormat format) {
     for (size_t i = 0; i < resourceManager.numMaterials; i++)
     {
         if ( strcmp(resourceManager.LoadedMaterialsPaths[i], path) == 0)
@@ -17,7 +25,7 @@ NE_Material* Resource_LoadMaterial( const char* path, int width, int height ) {
     }
 
     NE_Material *Material = NE_MaterialCreate();
-    NE_MaterialTexLoadFAT(Material, NE_RGB5, width, height, NE_TEXGEN_TEXCOORD,
+    NE_MaterialTexLoadFAT(Material, format, width, height, NE_TEXGEN_TEXCOORD,
         path);
 
     int index = resourceManager.numMaterials;

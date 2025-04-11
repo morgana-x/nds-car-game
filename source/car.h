@@ -1,10 +1,18 @@
 #include "entity.h"
 #include <NEMain.h>
+enum CAR_AI {
+    AI_NONE,
+    AI_TRAFFIC
+};
 typedef struct{
     Entity* Entity;
     int Speed;
     int MaxSpeed;
     int Direction;
+    enum CAR_AI aiType;
+    int targetX;
+    int targetZ;
+    
     /*void (*Right)( Car *entity);
     void (*Left)(  Car *entity);
     void (*Accelerate)( Car *entity);*/
