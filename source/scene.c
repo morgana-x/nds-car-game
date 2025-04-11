@@ -1,10 +1,56 @@
 #include "scene.h"
 #include "math.h"
+#include "resource.h"
+void Scene_Draw_Skybox(SceneData *Scene)
+{
+        // This set material's color to drawing color (default = white)
+        NE_MaterialUse(Scene->SkyboxMaterial);
+
+       // glMatrixMode(GL_PROJECTION);
+        //glLoadIdentity();
+       // gluPerspective(70, 256.0 / 192.0, 0.1, 40);
+    
+        gluLookAt(0.0, 0.0, 2.0,  // Position
+                  0.0, 0.0, 0.0,  // Look at
+                  0.0, 1.0, 0.0); // Up
+        // In general you should avoid using the functions below for drawing models
+        // because they have a much lower performance than precompiled models.
+        glMatrixMode(GL_MODELVIEW);
+        glPolyFmt(POLY_ALPHA(31) | POLY_CULL_NONE);
+
+        glPushMatrix();
+        //glOrthof32(0,0,1,1,100,1000);
+        // Begin drawing
+        float z = -1; //Scene->Camera->to[0] - 1000;
+        glBegin(GL_TRIANGLES);
+    
+            //NE_PolyColor(NE_Red);    // Set next vertices color
+            NE_PolyTexCoord(0, 0);   // Texture coordinates
+            glVertex3f(0, 2, z); // Send new vertex
+    
+            //NE_PolyColor(NE_Blue);
+            NE_PolyTexCoord(0, 128);
+            glVertex3f(3, -1, z);
+    
+            //NE_PolyColor(NE_Green);
+            NE_PolyTexCoord(128, 128);
+            glVertex3f(-3, -1, z);
+        glEnd();
+        glPopMatrix(1);
+        glMatrixMode(GL_MODELVIEW);
+}
 void Scene_Draw3d(void *arg)
 {
     SceneData *scene = arg;
 
+   // Scene_Draw_Skybox(scene);
+   
     NE_CameraUse(scene->Camera);
+    
+    
+    // This has to be used to use fog
+    NE_PolyFormat(31, 0, NE_LIGHT_ALL, NE_CULL_BACK, NE_FOG_ENABLE);
+    
     World_Render(scene->GameWorld,scene->PlayerCar->Entity);
    // NE_ModelDraw(Scene->PlayerCar->Entity->Model);
 }
@@ -48,16 +94,20 @@ void Scene_Init(SceneData* Scene)
 {
     // Allocate space for the objects we'll use
     Scene->Camera = NE_CameraCreate();
-    NE_ClippingPlanesSetI(1000, 280000);
+    NE_ClippingPlanesSetI(1000, 350000);
     // We set up a light and its color
     NE_LightSet(0, NE_White, -0.5, -0.5, -0.5);
-    
+
+    //NE_FogEnable(shift, color, 31, mass, depth);
+    NE_FogEnable(5, NE_White, 31, 1, 0x7C00);
+
     // Set coordinates for the camera
     NE_CameraSet(Scene->Camera,
         -8, 3, 0,  // Position
         0, 3, 0,  // Look at
         0, 1, 0); // Up direction
 
+    Scene->SkyboxMaterial = Resource_LoadMaterial("grass.img.bin", 128, 128);
     // Init world
     Scene->GameWorld = World_Init();
 

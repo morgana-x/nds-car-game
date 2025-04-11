@@ -1,4 +1,4 @@
-#include "car.h"
+//#include "car.h"
 #include "cell.h"
 #include <NEMain.h>
 typedef struct {
@@ -8,8 +8,9 @@ typedef struct {
     Car* cars[20];
     int cells_width;
     int cells_height;
+    int cells_max;
     int cell_size;
-    Cell* cells[100];
+    Cell* cells[200];
     
 } World;
 
@@ -18,4 +19,6 @@ void World_Render(World *world,Entity *Camera);
 void World_Render_Cell(World *world,Entity *PlayerCar, int x, int y);
 void World_Tick(World *world);
 bool World_AddCar(World *world,Car* car);
-void World_AddCell(World *world, Cell *cell);
+void World_Cell_Add(World *world, Cell *cell, int x, int y);
+void World_Cell_Remove(World *world, int x, int y);
+bool World_Cell_Inbounds(World *world, int x, int y);

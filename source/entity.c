@@ -28,6 +28,11 @@ void Entity_Tick(  Entity *entity)
 {
     
 }
+void Entity_Destroy(Entity *entity)
+{
+    free(entity->Model);
+    free(entity);
+}
 Entity *Entity_Create()
 {
     Entity *ent = calloc(1, sizeof( Entity));

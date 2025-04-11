@@ -1,14 +1,19 @@
 #include "world.h"
 #include "resource.h"
 #include "util.h"
-
+#include "math.h"
 void World_Render_Cell(World *world,Entity *PlayerCar, int x, int y)
 {
-    if (x < 0 || x >= world->cells_width || y < 0 || y >= world->cells_height)
+    if (!World_Cell_Inbounds(world, x, y))
         return;
     int index = (x * world->cells_width) + y;
     if (index < 0) return;
     if (index >= world->numCells) return;
+    if (!Cell_IsLoaded(world->cells[index]))
+    {
+        Cell_Load(world->cells[index]);
+        return; // Dont waste more time drawing, will only cause more stutter
+    }
     // Dist check is worse for performance in this case
     /*float dist = util_dist_float((float)PlayerCar->Model->x, 0, (float)PlayerCar->Model->z, (float)world->cells[index]->x, 0, (float)world->cells[index]->y);
     printf("Dist %f\n", dist);
@@ -17,13 +22,14 @@ void World_Render_Cell(World *world,Entity *PlayerCar, int x, int y)
 }
 void World_Render(World *world,Entity *PlayerCar)
 {
-    //NE_ModelDraw(world->groundTemp->Model);
-    int cell_size = world->cell_size;
-    int cx = (int)PlayerCar->Model->x/cell_size;
-    int cz = (int)PlayerCar->Model->z/cell_size;
-    //printf("Pos: %i %i\n", cx,cz);
-   // printf("Pos: %i %i\n", PlayerCar->Model->x,PlayerCar->Model->z);
+    float direction = ((float)PlayerCar->Model->ry/1000)*360 * 2;
+    float angle = (M_PI * direction /180);
+    float frontX = sin(angle);
+    float frontY = cos(angle);
 
+    int cell_size = world->cell_size;
+    int cx = (int)((int)PlayerCar->Model->x + frontX*200000)/cell_size;
+    int cz = (int)((int)PlayerCar->Model->z + frontY*200000)/cell_size;
     for (int x=-2;x<=2;x++)
     {
         for (int y=-2;y<=2;y++)
@@ -31,12 +37,19 @@ void World_Render(World *world,Entity *PlayerCar)
             World_Render_Cell(world,PlayerCar, cx + x, cz+y);
         }
     }
-    /*for(int i=0; i <world->numCells;i++)
+    /*for (int x=-4;x<=4;x++)
     {
-        float dist = util_dist_float((float)PlayerCar->Model->x, 0, (float)PlayerCar->Model->z, (float)world->cells[i]->x, 0, (float)world->cells[i]->y);
-        printf("Dist %f\n", dist);
-        if (dist < 100000)
-            Cell_Render(world->cells[i]);
+        if (x >= -2 && x <=2) continue;
+        for (int y=-4;y<=4;y++)
+        {
+            if (y >= -2 && y <=2) continue;
+            if (!World_Cell_Inbounds(world, cx+x, cz+y)) continue;
+            int index = (x * world->cells_width) + y;
+            if (index < 0) continue;
+            if (index >= world->numCells) continue;
+            if (!Cell_IsLoaded(world->cells[index])) continue;
+            Cell_Unload(world->cells[index]);
+        }
     }*/
     for(int i=0; i <world->numCars;i++)
     {
@@ -54,20 +67,39 @@ void World_Tick(World *world)
 }
 bool World_AddCar(World *world, Car* car)
 {
-    if (world->numCars >= 99)
+    if (world->numCars >= world->cells_max)
         return false;
     world->cars[world->numCars] = car;
     world->numCars++;
    // printf("Added car %i", world->numCars);
     return true;
 }
-void World_AddCell(World *world, Cell *cell)
+void World_Cell_Add(World *world, Cell *cell, int x, int y)
 {
-
-    if (world->numCells >= 64)
+    if (world->numCells > world->cells_max)
+    {
+        printf("Too many cells! aborting!");
         return;
-    world->cells[world->numCells] = cell;
+    }
+    if (x < 0 || x >= world->cells_width || y < 0 || y >= world->cells_height)
+        return;
+    int index = (x * world->cells_width) + y;
+    world->cells[index] = cell;
     world->numCells++;
+}
+void World_Cell_Remove(World *world, int x, int y)
+{
+    if (x < 0 || x >= world->cells_width || y < 0 || y >= world->cells_height)
+        return;
+    int index = (x * world->cells_width) + y;
+    if (index < 0) return;
+    if (index >= world->numCells) return;
+    Cell_Destroy(world->cells[index]);
+    world->numCells--;
+}
+bool World_Cell_Inbounds(World *world, int x, int y)
+{
+    return !(x < 0 || x >= world->cells_width || y < 0 || y >= world->cells_height);
 }
 World *World_Init()
 {
@@ -77,7 +109,8 @@ World *World_Init()
     world->numCells = 0;
     world->cells_width = 10;
     world->cells_height = 10;
-    world->cell_size = 100000;
+    world->cells_max = world->cells_width*world->cells_height;
+    world->cell_size = 140000;
     //NE_Material *grassMat = Resource_LoadMaterial("grass.img.bin", 128, 128);
 
     int cell_size = world->cell_size;//100000;
@@ -88,29 +121,9 @@ World *World_Init()
         for (int cy=0; cy<world->cells_height; cy++)
         {
             Cell *cell = Cell_Create(cx*cell_size,cy*cell_size);//, grassMat);
-
-            Entity *ent = Entity_Create();
-            Entity_LoadModel(ent, "model/nature/tree/tree01.bin");
-            Entity_LoadTexture(ent, "model/nature/tree/tree01_spring.img.bin", 256,  256);
-            Entity_SetPos(ent, 5, 0, 10);
-            Cell_AddProp(cell,ent->Model);
-
-            
-            Entity *ent2 = Entity_Create();
-            Entity_LoadModel(ent2, "cube.bin");
-            Entity_LoadTexture(ent2, "grass.img.bin", 128,  128);
-       
-            NE_ModelScaleI(ent2->Model,  cell_size,  20, cell_size);
-            Cell_AddProp(cell,ent2->Model);
-   
-            World_AddCell(world, cell);
+            //Cell_Load(cell);
+            World_Cell_Add(world, cell, cx, cy);
         }
     }
-    /*world->groundTemp = Entity_Create();
-    Entity_LoadModel( world->groundTemp, "cube.bin");
-    NE_ModelScale(world->groundTemp->Model, 40, 1, 40);
-    Entity_LoadTexture( world->groundTemp, "grass.img.bin", 128, 128);
-    world->groundTemp->Model->y = -40;*/
-
     return world;
 }

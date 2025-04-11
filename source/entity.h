@@ -15,3 +15,4 @@ void Entity_LoadTexture(  Entity *entity, const char* path, int width, int heigh
 void Entity_Init(  Entity *entity);
 void Entity_Tick(  Entity *entity);
 void Entity_SetPos(Entity *entity, int x, int y, int z);
+void Entity_Destroy(Entity *entity);
